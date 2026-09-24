@@ -8,7 +8,11 @@ Consensus candidates — strong on both — are the defensible shortlist.
 from __future__ import annotations
 
 import json
+import os
+import subprocess
 import sys
+
+import yaml
 
 import matplotlib
 
@@ -39,7 +43,44 @@ def spearman(x: list[float], y: list[float]) -> float:
     return float(np.corrcoef(rx, ry)[0, 1])
 
 
-def report(records: list[dict], out_json: str, out_png: str) -> dict:
+CONFIG = os.environ.get("DESIGN_CONFIG", "config/config.yaml")
+
+
+def _git_head(path: str) -> str | None:
+    try:
+        return subprocess.run(
+            ["git", "-C", path, "rev-parse", "HEAD"],
+            capture_output=True, text=True, check=True,
+        ).stdout.strip()
+    except Exception:
+        return None
+
+
+def _provenance(backbone: dict, cfg: dict) -> dict:
+    """Reproducibility record: model ids, upstream commit, run params."""
+    m = cfg["mpnn"]
+    return {
+        "backbone": {
+            "id": cfg["backbone"].get("id"),
+            "pdb": backbone["pdb"],
+            "chain": backbone["chain"],
+            "n_residues": backbone["n_residues"],
+        },
+        "generator": {
+            "tool": "ProteinMPNN (dauparas/ProteinMPNN, external)",
+            "repo_commit": _git_head(m["repo_path"]),
+            "model_name": m["model_name"],
+            "weights": m["weights"],
+            "num_seq_per_target": m["num_seq_per_target"],
+            "sampling_temp": m["sampling_temp"],
+            "seed": m["seed"],
+        },
+        "scorer": {"tool": "ESM-2 masked-marginal PLL", "model": cfg["esm"]["model"]},
+    }
+
+
+def report(records: list[dict], backbone: dict, cfg: dict,
+           out_json: str, out_png: str) -> dict:
     designed = [r for r in records if not r["is_native"]]
     native = [r for r in records if r["is_native"]][0]
     seqs = [r["seq"] for r in designed]
@@ -56,6 +97,7 @@ def report(records: list[dict], out_json: str, out_png: str) -> dict:
     top_idx = consensus.argsort()[:3]
 
     result = {
+        "provenance": _provenance(backbone, cfg),
         "n_designed": len(designed),
         "native_seq": native["seq"],
         "native_esm_pll": native["esm_pll"],
@@ -106,8 +148,16 @@ def report(records: list[dict], out_json: str, out_png: str) -> dict:
 
 
 def main() -> None:
-    in_path, out_json, out_png = sys.argv[1], sys.argv[2], sys.argv[3]
-    result = report(json.load(open(in_path)), out_json, out_png)
+    in_path, bb_path, out_json, out_png = sys.argv[1:5]
+    with open(CONFIG) as f:
+        cfg = yaml.safe_load(f)
+    result = report(
+        json.load(open(in_path)),
+        json.load(open(bb_path)),
+        cfg,
+        out_json,
+        out_png,
+    )
     print(
         f"report: {result['n_designed']} designed, consensus "
         f"spearman={result['score_correlation_spearman']} -> {out_json}"

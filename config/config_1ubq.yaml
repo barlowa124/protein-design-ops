@@ -1,13 +1,14 @@
-# Single source of truth: backbone, generator, scorer, and report settings.
+# Second backbone: ubiquitin (76 aa) — natural globular fold, contrasts the
+# engineered trp-cage miniprotein in the default config. Run with:
+#   DESIGN_CONFIG=config/config_1ubq.yaml snakemake
+# Outputs land in results/1ubq/ and data/processed/1ubq/.
 
 backbone:
-  id: "1l2y"
-  pdb: "tests/fixtures/1L2Y.pdb"    # trp-cage miniprotein (20 aa) — fast demo
+  id: "1ubq"
+  pdb: "tests/fixtures/1UBQ.pdb"
   chain: "A"
 
 mpnn:
-  # ProteinMPNN is an external upstream tool (dauparas/ProteinMPNN), NOT
-  # vendored. Clone it separately and point repo_path at it.
   repo_path: "../proteinmpnn-ext"
   run_script: "protein_mpnn_run.py"
   weights: "vanilla_model_weights/v_48_020.pt"

@@ -1,0 +1,54 @@
+{
+  "provenance": {
+    "backbone": {
+      "id": "1l2y",
+      "pdb": "tests/fixtures/1L2Y.pdb",
+      "chain": "A",
+      "n_residues": 20
+    },
+    "generator": {
+      "tool": "ProteinMPNN (dauparas/ProteinMPNN, external)",
+      "repo_commit": "8907e6671bfbfc92303b5f79c4b5e6ce47cdef57",
+      "model_name": "v_48_020",
+      "weights": "vanilla_model_weights/v_48_020.pt",
+      "num_seq_per_target": 16,
+      "sampling_temp": 0.1,
+      "seed": 0
+    },
+    "scorer": {
+      "tool": "ESM-2 masked-marginal PLL",
+      "model": "facebook/esm2_t6_8M_UR50D"
+    }
+  },
+  "n_designed": 16,
+  "native_seq": "NLYIQWLKDGGPSSGRPPPS",
+  "native_esm_pll": -2.8665,
+  "mean_pairwise_identity": 0.666,
+  "mean_seq_recovery": 0.359,
+  "score_correlation_spearman": -0.544,
+  "consensus_top3": [
+    {
+      "seq": "EALRRWEAEGGEASGRPRPV",
+      "mpnn_score": 1.1514,
+      "esm_pll": -2.4251,
+      "seq_recovery": 0.4
+    },
+    {
+      "seq": "AALAEWQARGGAAAGVPAPV",
+      "mpnn_score": 1.1726,
+      "esm_pll": -2.1806,
+      "seq_recovery": 0.3
+    },
+    {
+      "seq": "QALQEWLARGGENAGLPRPE",
+      "mpnn_score": 1.1409,
+      "esm_pll": -2.6951,
+      "seq_recovery": 0.35
+    }
+  ],
+  "designed_esm_pll": {
+    "min": -2.869,
+    "max": -2.181,
+    "mean": -2.644
+  }
+}

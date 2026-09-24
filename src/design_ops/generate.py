@@ -8,6 +8,7 @@ carries the model's own score and seq_recovery in each header.
 from __future__ import annotations
 
 import json
+import os
 import re
 import subprocess
 import sys
@@ -15,6 +16,8 @@ import tempfile
 from pathlib import Path
 
 import yaml
+
+CONFIG = os.environ.get("DESIGN_CONFIG", "config/config.yaml")
 
 
 def parse_mpnn_fasta(path: str) -> list[dict]:
@@ -67,7 +70,7 @@ def generate(cfg: dict, backbone: dict, workdir: Path) -> list[dict]:
 
 def main() -> None:
     backbone_path, out_path = sys.argv[1], sys.argv[2]
-    with open("config/config.yaml") as f:
+    with open(CONFIG) as f:
         cfg = yaml.safe_load(f)
     backbone = json.load(open(backbone_path))
     with tempfile.TemporaryDirectory() as tmp:

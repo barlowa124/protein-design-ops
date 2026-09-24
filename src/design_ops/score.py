@@ -9,9 +9,12 @@ on MPNN's own score — the cross-model agreement is the report's signal.
 from __future__ import annotations
 
 import json
+import os
 import sys
 
 import yaml
+
+CONFIG = os.environ.get("DESIGN_CONFIG", "config/config.yaml")
 
 
 def pll(seq: str, tok, model) -> float:
@@ -44,7 +47,7 @@ def score_candidates(records: list[dict], model_name: str) -> list[dict]:
 
 def main() -> None:
     in_path, out_path = sys.argv[1], sys.argv[2]
-    with open("config/config.yaml") as f:
+    with open(CONFIG) as f:
         cfg = yaml.safe_load(f)
     records = json.load(open(in_path))
     records = score_candidates(records, cfg["esm"]["model"])
