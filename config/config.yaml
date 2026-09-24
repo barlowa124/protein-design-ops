@@ -2,7 +2,7 @@
 
 backbone:
   id: "1l2y"
-  pdb: "tests/fixtures/1L2Y.pdb"    # trp-cage miniprotein (20 aa) — fast demo
+  pdb: "tests/fixtures/1L2Y.pdb"    # trp-cage miniprotein (20 aa), fast demo
   chain: "A"
 
 mpnn:
@@ -18,7 +18,7 @@ mpnn:
   seed: 37  # upstream treats 0 as "pick a random seed" (falsy check)
 
 esm:
-  model: "facebook/esm2_t6_8M_UR50D"   # 8M params — CPU-feasible zero-shot scorer
+  model: "facebook/esm2_t6_8M_UR50D"   # 8M params, CPU-feasible zero-shot scorer
 
 report:
   top_k: 3   # consensus shortlist size

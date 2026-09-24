@@ -64,7 +64,7 @@ def generate(cfg: dict, backbone: dict, workdir: Path) -> list[dict]:
     fasta = next((out_dir / "seqs").glob("*.fa"), None)
     if fasta is None:
         raise RuntimeError(
-            f"ProteinMPNN produced no .fa under {out_dir / 'seqs'} — "
+            f"ProteinMPNN produced no .fa under {out_dir / 'seqs'}, "
             "check repo_path/run_script config"
         )
     return parse_mpnn_fasta(str(fasta))

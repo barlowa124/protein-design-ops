@@ -27,7 +27,7 @@ def parse_chain(pdb_path: str, chain: str) -> dict:
         for line in f:
             if line.startswith("ENDMDL"):
                 break  # NMR ensembles: use MODEL 1 only
-            # skip short/malformed records rather than slice-crash
+            # skip short/malformed records instead of slice-crashing
             if not line.startswith("ATOM") or len(line) < 54:
                 continue
             if line[21] != chain or line[12:16].strip() != "CA":
@@ -55,7 +55,7 @@ def main() -> None:
     with open(out_path, "w") as f:
         json.dump(info, f, indent=2)
     print(
-        f"backbone: {bb['pdb']} chain {bb['chain']} — "
+        f"backbone: {bb['pdb']} chain {bb['chain']}: "
         f"{info['n_residues']} residues, native seq {info['native_seq']}"
     )
 

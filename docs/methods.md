@@ -15,7 +15,7 @@ design sits where the two objectives trade off.
 
 ## Known limitations
 
-- ESM-2 PLL is a sequence prior — it does not know the backbone, so a
+- ESM-2 PLL is a sequence prior. It does not know the backbone, so a
   high-ESM sequence can still be a poor MPNN candidate and vice versa.
 - MPNN `seq_recovery` is sequence identity to the input native sequence,
   not a folding metric.
@@ -27,7 +27,7 @@ design sits where the two objectives trade off.
 
 ## External dependencies
 
-- `dauparas/ProteinMPNN` — cloned separately (`config.mpnn.repo_path`),
+- `dauparas/ProteinMPNN` - cloned separately (`config.mpnn.repo_path`),
   invoked as a subprocess; its weights ship with the repo. MIT license.
-- `facebook/esm2_t6_8M_UR50D` via HuggingFace transformers — downloaded
+- `facebook/esm2_t6_8M_UR50D` via HuggingFace transformers, downloaded
   on first run.

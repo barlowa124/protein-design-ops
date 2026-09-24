@@ -3,7 +3,7 @@
 For each candidate, mask every position in turn and take the model's
 log-probability of the actual residue; the mean over positions is the
 sequence's zero-shot fitness score. This is an independent second opinion
-on MPNN's own score — the cross-model agreement is the report's signal.
+on MPNN's own score. The cross-model agreement is the report's signal.
 """
 
 from __future__ import annotations
@@ -19,7 +19,7 @@ def pll(seq: str, tok, model) -> float:
     """Mean masked-marginal log-prob of a sequence. Pure w.r.t. model+tok.
 
     All len(seq) single-position masks are scored in one batched forward
-    pass rather than N sequential ones.
+    pass instead of N sequential ones.
     """
     import torch
 

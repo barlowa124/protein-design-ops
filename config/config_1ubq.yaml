@@ -1,4 +1,4 @@
-# Second backbone: ubiquitin (76 aa) — natural globular fold, contrasts the
+# Second backbone: ubiquitin (76 aa), natural globular fold, contrasts the
 # engineered trp-cage miniprotein in the default config. Run with:
 #   DESIGN_CONFIG=config/config_1ubq.yaml snakemake
 # Outputs land in results/1ubq/ and data/processed/1ubq/.
@@ -19,7 +19,7 @@ mpnn:
   seed: 37  # upstream treats 0 as "pick a random seed" (falsy check)
 
 esm:
-  model: "facebook/esm2_t6_8M_UR50D"   # 8M params — CPU-feasible zero-shot scorer
+  model: "facebook/esm2_t6_8M_UR50D"   # 8M params, CPU-feasible zero-shot scorer
 
 report:
   top_k: 3

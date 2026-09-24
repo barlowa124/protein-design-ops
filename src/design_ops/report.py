@@ -2,7 +2,7 @@
 
 Each designed sequence has two independent scores: MPNN's own
 backbone-conditioned likelihood and ESM-2's zero-shot sequence fitness.
-Consensus candidates — strong on both — are the defensible shortlist.
+Consensus candidates, strong on both, are the defensible shortlist.
 """
 
 from __future__ import annotations
@@ -96,9 +96,9 @@ def report(records: list[dict], backbone: dict, cfg: dict,
     designed = [r for r in records if not r["is_native"]]
     natives = [r for r in records if r["is_native"]]
     if not natives:
-        raise ValueError("no native record in input — check generate parsing")
+        raise ValueError("no native record in input, check generate parsing")
     if not designed:
-        raise ValueError("no designed candidates in input — nothing to rank")
+        raise ValueError("no designed candidates in input, nothing to rank")
     native = natives[0]
     seqs = [r["seq"] for r in designed]
     mpnn = np.array([r["mpnn_score"] for r in designed])
