@@ -27,6 +27,8 @@ def parse_chain(pdb_path: str, chain: str) -> dict:
     residues = {}
     with open(pdb_path) as f:
         for line in f:
+            if line.startswith("ENDMDL"):
+                break  # NMR ensembles: use MODEL 1 only
             if not line.startswith("ATOM"):
                 continue
             if line[21] != chain or line[12:16].strip() != "CA":
@@ -34,7 +36,7 @@ def parse_chain(pdb_path: str, chain: str) -> dict:
             resseq = int(line[22:26])
             resname = line[17:20].strip()
             if resname in AA3:
-                residues[resseq] = AA3[resname]
+                residues.setdefault(resseq, AA3[resname])
     if not residues:
         raise ValueError(f"no CA atoms found for chain {chain!r} in {pdb_path}")
     resseqs = sorted(residues)
