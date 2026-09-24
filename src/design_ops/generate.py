@@ -64,7 +64,12 @@ def generate(cfg: dict, backbone: dict, workdir: Path) -> list[dict]:
         str(Path(m["repo_path"]) / Path(m["weights"]).parent) + "/",
     ]
     subprocess.run(cmd, check=True, capture_output=True, text=True)
-    fasta = next((out_dir / "seqs").glob("*.fa"))
+    fasta = next((out_dir / "seqs").glob("*.fa"), None)
+    if fasta is None:
+        raise RuntimeError(
+            f"ProteinMPNN produced no .fa under {out_dir / 'seqs'} — "
+            "check repo_path/run_script config"
+        )
     return parse_mpnn_fasta(str(fasta))
 
 

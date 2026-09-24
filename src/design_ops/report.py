@@ -56,6 +56,18 @@ def _git_head(path: str) -> str | None:
         return None
 
 
+def _pkg_versions() -> dict:
+    from importlib.metadata import version
+
+    out = {}
+    for pkg in ("torch", "transformers", "numpy", "scipy"):
+        try:
+            out[pkg] = version(pkg)
+        except Exception:
+            pass
+    return out
+
+
 def _provenance(backbone: dict, cfg: dict) -> dict:
     """Reproducibility record: model ids, upstream commit, run params."""
     m = cfg["mpnn"]
@@ -76,6 +88,8 @@ def _provenance(backbone: dict, cfg: dict) -> dict:
             "seed": m["seed"],
         },
         "scorer": {"tool": "ESM-2 masked-marginal PLL", "model": cfg["esm"]["model"]},
+        "git_commit": _git_head("."),
+        "versions": _pkg_versions(),
     }
 
 
@@ -102,16 +116,21 @@ def report(records: list[dict], backbone: dict, cfg: dict,
     top_k = int(cfg.get("report", {}).get("top_k", 3))
     top_idx = consensus.argsort()[:top_k]
 
+    # Rank statistics need >=2 candidates; below that report nulls rather
+    # than letting NaN fail at json.dump(allow_nan=False).
+    pw = pairwise_identities(seqs)
     result = {
         "provenance": _provenance(backbone, cfg),
         "n_designed": len(designed),
         "native_seq": native["seq"],
         "native_esm_pll": native["esm_pll"],
-        "mean_pairwise_identity": round(
-            float(np.mean(pairwise_identities(seqs))), 3
-        ),
+        "mean_pairwise_identity": round(float(np.mean(pw)), 3) if pw else None,
         "mean_seq_recovery": round(float(rec.mean()), 3),
-        "score_correlation_spearman": round(spearman(list(mpnn), list(esm)), 3),
+        "score_correlation_spearman": (
+            round(spearman(list(mpnn), list(esm)), 3)
+            if len(designed) >= 2
+            else None
+        ),
         f"consensus_top{top_k}": [
             {
                 "seq": designed[i]["seq"],
