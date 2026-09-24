@@ -19,3 +19,6 @@ mpnn:
 
 esm:
   model: "facebook/esm2_t6_8M_UR50D"   # 8M params — CPU-feasible zero-shot scorer
+
+report:
+  top_k: 3   # consensus shortlist size

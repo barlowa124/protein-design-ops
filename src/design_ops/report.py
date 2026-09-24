@@ -99,7 +99,8 @@ def report(records: list[dict], backbone: dict, cfg: dict,
     mpnn_rank = mpnn.argsort().argsort()          # 0 = best (lowest)
     esm_rank = (-esm).argsort().argsort()          # 0 = best (highest)
     consensus = mpnn_rank + esm_rank
-    top_idx = consensus.argsort()[:3]
+    top_k = int(cfg.get("report", {}).get("top_k", 3))
+    top_idx = consensus.argsort()[:top_k]
 
     result = {
         "provenance": _provenance(backbone, cfg),
@@ -111,7 +112,7 @@ def report(records: list[dict], backbone: dict, cfg: dict,
         ),
         "mean_seq_recovery": round(float(rec.mean()), 3),
         "score_correlation_spearman": round(spearman(list(mpnn), list(esm)), 3),
-        "consensus_top3": [
+        f"consensus_top{top_k}": [
             {
                 "seq": designed[i]["seq"],
                 "mpnn_score": designed[i]["mpnn_score"],
