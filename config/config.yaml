@@ -1,0 +1,20 @@
+# Single source of truth: backbone, generator, scorer, and report settings.
+
+backbone:
+  pdb: "tests/fixtures/1L2Y.pdb"    # trp-cage miniprotein (20 aa) — fast demo
+  chain: "A"
+
+mpnn:
+  # ProteinMPNN is an external upstream tool (dauparas/ProteinMPNN), NOT
+  # vendored. Clone it separately and point repo_path at it.
+  repo_path: "../proteinmpnn-ext"
+  run_script: "protein_mpnn_run.py"
+  weights: "vanilla_model_weights/v_48_020.pt"
+  model_name: "v_48_020"
+  num_seq_per_target: 16
+  sampling_temp: 0.1
+  batch_size: 1
+  seed: 0
+
+esm:
+  model: "facebook/esm2_t6_8M_UR50D"   # 8M params — CPU-feasible zero-shot scorer

@@ -1,0 +1,51 @@
+"""design-ops DAG:
+
+    backbone -> generate (ProteinMPNN) -> score (ESM-2) -> report
+"""
+
+import sys
+
+configfile: "config/config.yaml"
+
+PY = sys.executable  # keeps the DAG on the project venv
+
+
+rule all:
+    input:
+        "results/design_report.json",
+        "results/consensus.png",
+
+
+rule backbone:
+    output:
+        "data/processed/backbone.json",
+    shell:
+        "{PY} -m design_ops.backbone {output}"
+
+
+rule generate:
+    input:
+        "data/processed/backbone.json",
+    output:
+        "data/processed/candidates.json",
+    shell:
+        "{PY} -m design_ops.generate {input} {output}"
+
+
+rule score:
+    input:
+        "data/processed/candidates.json",
+    output:
+        "data/processed/scores.json",
+    shell:
+        "{PY} -m design_ops.score {input} {output}"
+
+
+rule report:
+    input:
+        "data/processed/scores.json",
+    output:
+        report="results/design_report.json",
+        figure="results/consensus.png",
+    shell:
+        "{PY} -m design_ops.report {input} {output.report} {output.figure}"
