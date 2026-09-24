@@ -40,6 +40,26 @@ class BackboneTests(unittest.TestCase):
         self.assertEqual(info["native_seq"][:5], "NLYIQ")
         self.assertEqual(len(info["resseqs"]), 20)
 
+    def test_malformed_short_atom_line_skipped(self):
+        pdb = _pdb([
+            "ATOM      1  CA  ALA A   1\n",  # truncated, no coords
+            _ca(2, 2, "GLY"),
+        ])
+        info = parse_chain(pdb, "A")
+        self.assertEqual(info["native_seq"], "G")
+
+    def test_endmdl_stops_at_first_model(self):
+        pdb = _pdb([
+            "MODEL        1\n",
+            _ca(1, 1, "ALA"),
+            "ENDMDL\n",
+            "MODEL        2\n",
+            _ca(1, 2, "GLY"),
+            "ENDMDL\n",
+        ])
+        info = parse_chain(pdb, "A")
+        self.assertEqual(info["native_seq"], "A")  # MODEL 2 ignored
+
 
 if __name__ == "__main__":
     unittest.main()
