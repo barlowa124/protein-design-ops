@@ -27,7 +27,8 @@ def parse_chain(pdb_path: str, chain: str) -> dict:
         for line in f:
             if line.startswith("ENDMDL"):
                 break  # NMR ensembles: use MODEL 1 only
-            if not line.startswith("ATOM"):
+            # skip short/malformed records rather than slice-crash
+            if not line.startswith("ATOM") or len(line) < 54:
                 continue
             if line[21] != chain or line[12:16].strip() != "CA":
                 continue
