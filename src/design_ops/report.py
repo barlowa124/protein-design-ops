@@ -36,7 +36,7 @@ def pairwise_identities(seqs: list[str]) -> list[float]:
 
 
 def spearman(x: list[float], y: list[float]) -> float:
-    """Spearman rank correlation without scipy."""
+    """Spearman rank correlation: Pearson correlation of scipy rankdata."""
     from scipy.stats import rankdata
 
     rx, ry = rankdata(x), rankdata(y)
@@ -82,7 +82,12 @@ def _provenance(backbone: dict, cfg: dict) -> dict:
 def report(records: list[dict], backbone: dict, cfg: dict,
            out_json: str, out_png: str) -> dict:
     designed = [r for r in records if not r["is_native"]]
-    native = [r for r in records if r["is_native"]][0]
+    natives = [r for r in records if r["is_native"]]
+    if not natives:
+        raise ValueError("no native record in input — check generate parsing")
+    if not designed:
+        raise ValueError("no designed candidates in input — nothing to rank")
+    native = natives[0]
     seqs = [r["seq"] for r in designed]
     mpnn = np.array([r["mpnn_score"] for r in designed])
     esm = np.array([r["esm_pll"] for r in designed])
@@ -143,7 +148,7 @@ def report(records: list[dict], backbone: dict, cfg: dict,
     fig.savefig(out_png, dpi=150)
 
     with open(out_json, "w") as f:
-        json.dump(result, f, indent=2)
+        json.dump(result, f, indent=2, allow_nan=False)
     return result
 
 
