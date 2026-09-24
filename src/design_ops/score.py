@@ -9,30 +9,33 @@ on MPNN's own score — the cross-model agreement is the report's signal.
 from __future__ import annotations
 
 import json
-import os
 import sys
+from design_ops.config import load_config
 
-import yaml
 
-CONFIG = os.environ.get("DESIGN_CONFIG", "config/config.yaml")
 
 
 def pll(seq: str, tok, model) -> float:
-    """Mean masked-marginal log-prob of a sequence. Pure w.r.t. model+tok."""
+    """Mean masked-marginal log-prob of a sequence. Pure w.r.t. model+tok.
+
+    All len(seq) single-position masks are scored in one batched forward
+    pass rather than N sequential ones.
+    """
     import torch
 
-    total = 0.0
-    for i in range(len(seq)):
-        masked = seq[:i] + tok.mask_token + seq[i + 1 :]
-        inputs = tok(masked, return_tensors="pt")
-        with torch.no_grad():
-            logits = model(**inputs).logits[0]
-        mask_idx = (
-            inputs["input_ids"][0] == tok.mask_token_id
-        ).nonzero()[0].item()
-        lp = torch.log_softmax(logits[mask_idx], dim=-1)
-        total += float(lp[tok.convert_tokens_to_ids(seq[i])])
-    return total / len(seq)
+    n = len(seq)
+    masked = [seq[:i] + tok.mask_token + seq[i + 1 :] for i in range(n)]
+    inputs = tok(masked, return_tensors="pt")
+    with torch.no_grad():
+        logits = model(**inputs).logits  # (n, L, V)
+    mask_pos = (inputs["input_ids"] == tok.mask_token_id).nonzero()
+    target_ids = torch.tensor(
+        [tok.convert_tokens_to_ids(c) for c in seq]
+    )
+    lp = torch.log_softmax(
+        logits[mask_pos[:, 0], mask_pos[:, 1]], dim=-1
+    )
+    return float(lp[torch.arange(n), target_ids].sum() / n)
 
 
 def score_candidates(records: list[dict], model_name: str) -> list[dict]:
@@ -47,9 +50,9 @@ def score_candidates(records: list[dict], model_name: str) -> list[dict]:
 
 def main() -> None:
     in_path, out_path = sys.argv[1], sys.argv[2]
-    with open(CONFIG) as f:
-        cfg = yaml.safe_load(f)
-    records = json.load(open(in_path))
+    cfg = load_config()
+    with open(in_path) as f:
+        records = json.load(f)
     records = score_candidates(records, cfg["esm"]["model"])
     with open(out_path, "w") as f:
         json.dump(records, f, indent=2)

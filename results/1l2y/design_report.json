@@ -13,42 +13,49 @@
       "weights": "vanilla_model_weights/v_48_020.pt",
       "num_seq_per_target": 16,
       "sampling_temp": 0.1,
-      "seed": 0
+      "seed": 37
     },
     "scorer": {
       "tool": "ESM-2 masked-marginal PLL",
       "model": "facebook/esm2_t6_8M_UR50D"
+    },
+    "git_commit": "52a1fb4837056b3a2c89b31f58d0a930829b3e6a",
+    "versions": {
+      "torch": "2.14.0",
+      "transformers": "5.17.0",
+      "numpy": "2.4.6",
+      "scipy": "1.17.1"
     }
   },
   "n_designed": 16,
   "native_seq": "NLYIQWLKDGGPSSGRPPPS",
   "native_esm_pll": -2.8665,
-  "mean_pairwise_identity": 0.666,
-  "mean_seq_recovery": 0.359,
-  "score_correlation_spearman": -0.544,
+  "mean_pairwise_identity": 0.681,
+  "mean_seq_recovery": 0.378,
+  "score_correlation_spearman": -0.632,
   "consensus_top3": [
     {
-      "seq": "EALRRWEAEGGEASGRPRPV",
-      "mpnn_score": 1.1514,
-      "esm_pll": -2.4251,
-      "seq_recovery": 0.4
-    },
-    {
-      "seq": "AALAEWQARGGAAAGVPAPV",
-      "mpnn_score": 1.1726,
-      "esm_pll": -2.1806,
+      "seq": "AALAEWEARGGAAAGLPRPT",
+      "mpnn_score": 1.1014,
+      "esm_pll": -2.2555,
       "seq_recovery": 0.3
     },
     {
-      "seq": "QALQEWLARGGENAGLPRPE",
-      "mpnn_score": 1.1409,
-      "esm_pll": -2.6951,
+      "seq": "AARQEWLARGGAAAGRPAPV",
+      "mpnn_score": 1.109,
+      "esm_pll": -2.3425,
+      "seq_recovery": 0.4
+    },
+    {
+      "seq": "AALQEWLARGGAAAGEPRPV",
+      "mpnn_score": 1.1427,
+      "esm_pll": -2.2167,
       "seq_recovery": 0.35
     }
   ],
   "designed_esm_pll": {
-    "min": -2.869,
-    "max": -2.181,
-    "mean": -2.644
+    "min": -2.883,
+    "max": -2.217,
+    "mean": -2.585
   }
 }

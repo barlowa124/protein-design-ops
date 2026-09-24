@@ -7,12 +7,10 @@ Output (data/processed/backbone.json):
 from __future__ import annotations
 
 import json
-import os
 import sys
+from design_ops.config import load_config
 
-import yaml
 
-CONFIG = os.environ.get("DESIGN_CONFIG", "config/config.yaml")
 
 AA3 = {
     "ALA": "A", "ARG": "R", "ASN": "N", "ASP": "D", "CYS": "C",
@@ -48,8 +46,7 @@ def parse_chain(pdb_path: str, chain: str) -> dict:
 
 def main() -> None:
     out_path = sys.argv[1]
-    with open(CONFIG) as f:
-        cfg = yaml.safe_load(f)
+    cfg = load_config()
     bb = cfg["backbone"]
     info = parse_chain(bb["pdb"], bb["chain"])
     info.update({"pdb": bb["pdb"], "chain": bb["chain"],

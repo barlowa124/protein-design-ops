@@ -8,39 +8,36 @@ carries the model's own score and seq_recovery in each header.
 from __future__ import annotations
 
 import json
-import os
 import re
 import subprocess
 import sys
 import tempfile
 from pathlib import Path
-
-import yaml
-
-CONFIG = os.environ.get("DESIGN_CONFIG", "config/config.yaml")
+from design_ops.config import load_config
 
 
 def parse_mpnn_fasta(path: str) -> list[dict]:
     """ProteinMPNN FASTA -> records; first entry is the native sequence."""
     records = []
     header = None
-    for line in open(path):
-        line = line.strip()
-        if line.startswith(">"):
-            header = line[1:]
-        elif line and header is not None:
-            meta = dict(re.findall(r"(\w+)=(\S+?)(?:,|$)", header))
-            records.append(
-                {
-                    "header": header,
-                    "seq": line,
-                    "mpnn_score": float(meta["score"]),
-                    "seq_recovery": float(meta.get("seq_recovery", 1.0)),
-                    "is_native": "designed_chains" in header
-                        and "sample" not in meta,
-                }
-            )
-            header = None
+    with open(path) as f:
+        for line in f:
+            line = line.strip()
+            if line.startswith(">"):
+                header = line[1:]
+            elif line and header is not None:
+                meta = dict(re.findall(r"(\w+)=(\S+?)(?:,|$)", header))
+                records.append(
+                    {
+                        "header": header,
+                        "seq": line,
+                        "mpnn_score": float(meta["score"]),
+                        "seq_recovery": float(meta.get("seq_recovery", 1.0)),
+                        "is_native": "designed_chains" in header
+                            and "sample" not in meta,
+                    }
+                )
+                header = None
     return records
 
 
@@ -75,9 +72,9 @@ def generate(cfg: dict, backbone: dict, workdir: Path) -> list[dict]:
 
 def main() -> None:
     backbone_path, out_path = sys.argv[1], sys.argv[2]
-    with open(CONFIG) as f:
-        cfg = yaml.safe_load(f)
-    backbone = json.load(open(backbone_path))
+    cfg = load_config()
+    with open(backbone_path) as f:
+        backbone = json.load(f)
     with tempfile.TemporaryDirectory() as tmp:
         records = generate(cfg, backbone, Path(tmp))
     with open(out_path, "w") as f:

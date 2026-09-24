@@ -8,17 +8,16 @@ Consensus candidates — strong on both — are the defensible shortlist.
 from __future__ import annotations
 
 import json
-import os
 import subprocess
 import sys
 
-import yaml
 
 import matplotlib
 
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
+from design_ops.config import load_config
 
 
 def identity(a: str, b: str) -> float:
@@ -43,7 +42,6 @@ def spearman(x: list[float], y: list[float]) -> float:
     return float(np.corrcoef(rx, ry)[0, 1])
 
 
-CONFIG = os.environ.get("DESIGN_CONFIG", "config/config.yaml")
 
 
 def _git_head(path: str) -> str | None:
@@ -114,6 +112,9 @@ def report(records: list[dict], backbone: dict, cfg: dict,
     esm_rank = (-esm).argsort().argsort()          # 0 = best (highest)
     consensus = mpnn_rank + esm_rank
     top_k = int(cfg.get("report", {}).get("top_k", 3))
+    if top_k < 1:
+        raise ValueError(f"report.top_k must be >= 1, got {top_k}")
+    top_k = min(top_k, len(designed))
     top_idx = consensus.argsort()[:top_k]
 
     # Rank statistics need >=2 candidates; below that report nulls rather
@@ -174,15 +175,12 @@ def report(records: list[dict], backbone: dict, cfg: dict,
 
 def main() -> None:
     in_path, bb_path, out_json, out_png = sys.argv[1:5]
-    with open(CONFIG) as f:
-        cfg = yaml.safe_load(f)
-    result = report(
-        json.load(open(in_path)),
-        json.load(open(bb_path)),
-        cfg,
-        out_json,
-        out_png,
-    )
+    cfg = load_config()
+    with open(in_path) as f:
+        records = json.load(f)
+    with open(bb_path) as f:
+        backbone = json.load(f)
+    result = report(records, backbone, cfg, out_json, out_png)
     print(
         f"report: {result['n_designed']} designed, consensus "
         f"spearman={result['score_correlation_spearman']} -> {out_json}"

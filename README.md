@@ -39,23 +39,31 @@ seconds on CPU, including ESM-2 scoring. A second config
 
 | Backbone | Fold | Spearman(MPNN, ESM-2) | Mean recovery | Native ESM-2 | Designed ESM-2 mean |
 |---|---|---:|---:|---:|---:|
-| 1L2Y trp-cage (20 aa) | engineered miniprotein | **-0.544** | 0.36 | -2.87 | -2.64 |
-| 1UBQ ubiquitin (76 aa) | natural globular | **-0.05** | 0.55 | -2.32 | -1.91 |
+| 1L2Y trp-cage (20 aa) | engineered miniprotein | **-0.632** | 0.38 | -2.87 | -2.59 |
+| 1UBQ ubiquitin (76 aa) | natural globular | **-0.529** | 0.55 | -2.32 | -1.92 |
 
-- On trp-cage the two models **anticorrelate** — they genuinely disagree,
-  so the consensus shortlist is a compromise, not the best on either
-  metric. On ubiquitin they are essentially uncorrelated: the
-  disagreement is backbone-dependent, not a fixed property of the
-  pairing. This is reported rather than smoothed over — single-model
-  confidence is exactly what the second scorer exists to challenge.
+- On both backbones the two models **anticorrelate** — they genuinely
+  disagree, so the consensus shortlist is a compromise, not the best on
+  either metric. This is reported rather than smoothed over —
+  single-model confidence is exactly what the second scorer exists to
+  challenge.
 - Designed sequences out-score the native on ESM-2 for both backbones;
-  for the natural fold the gap is wider (-1.91 vs -2.32). Plausible for
+  for the natural fold the gap is wider (-1.92 vs -2.32). Plausible for
   fixed-backbone redesign; it is a sequence-fitness observation, not a
   folding or function claim.
 
 `design_report.json` carries a `provenance` block: backbone id,
 ProteinMPNN upstream commit + weights, sampling params/seed, and the
 ESM-2 model id — enough to reproduce a run exactly.
+
+**Reproducibility caveat found the hard way:** ProteinMPNN's `--seed`
+treats `0` as "pick a random seed" (the upstream script does
+`if args.seed:` — 0 is falsy). An earlier config set `seed: 0` believing
+it pinned sampling; the runs above use `seed: 37` and are deterministic
+(bit-identical candidates across repeated runs). The earlier ubiquitin
+correlation near zero was a random-seed artifact, not a real
+backbone-dependence signal — with sampling pinned, both backbones
+anticorrelate.
 
 ## Scope honesty
 
