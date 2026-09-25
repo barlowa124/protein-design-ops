@@ -63,7 +63,7 @@ correlation near zero was a random-seed artifact, not a real
 backbone-dependence signal. With sampling pinned, both backbones
 anticorrelate.
 
-## Scope honesty
+## Scope
 
 - Candidates are computational designs only. No claim of stability,
   folding, or function. That requires structure prediction of the
