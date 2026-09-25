@@ -18,26 +18,37 @@ from design_ops.config import load_config
 
 def parse_mpnn_fasta(path: str) -> list[dict]:
     """ProteinMPNN FASTA -> records; first entry is the native sequence."""
+    def flush(header, seq_lines, records):
+        if header is None:
+            return
+        if not seq_lines:
+            return  # header-only lines (MPNN block markers) carry no record
+        meta = dict(re.findall(r"(\w+)=(\S+?)(?:,|$)", header))
+        if "score" not in meta:
+            raise ValueError(
+                f"malformed FASTA header (no score=): {header!r}")
+        records.append(
+            {
+                "header": header,
+                "seq": "".join(seq_lines),
+                "mpnn_score": float(meta["score"]),
+                "seq_recovery": float(meta.get("seq_recovery", 1.0)),
+                "is_native": "designed_chains" in header
+                    and "sample" not in meta,
+            }
+        )
+
     records = []
-    header = None
+    header, seq_lines = None, []
     with open(path) as f:
         for line in f:
             line = line.strip()
             if line.startswith(">"):
-                header = line[1:]
+                flush(header, seq_lines, records)
+                header, seq_lines = line[1:], []
             elif line and header is not None:
-                meta = dict(re.findall(r"(\w+)=(\S+?)(?:,|$)", header))
-                records.append(
-                    {
-                        "header": header,
-                        "seq": line,
-                        "mpnn_score": float(meta["score"]),
-                        "seq_recovery": float(meta.get("seq_recovery", 1.0)),
-                        "is_native": "designed_chains" in header
-                            and "sample" not in meta,
-                    }
-                )
-                header = None
+                seq_lines.append(line)  # FASTA wrapping: continuation
+    flush(header, seq_lines, records)
     return records
 
 
