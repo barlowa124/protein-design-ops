@@ -49,13 +49,24 @@ rule score:
         "{PY} -m design_ops.score {input} {output}"
 
 
+rule fold:
+    # ESMFold confidence screen; downloads ~2.4 GB weights on first run
+    input:
+        f"{PROC}/scores.json",
+    output:
+        f"{PROC}/fold.json",
+    shell:
+        "{PY} -m design_ops.fold {input} {output} {RES}/folds"
+
+
 rule report:
     input:
         scores=f"{PROC}/scores.json",
         backbone=f"{PROC}/backbone.json",
+        fold=f"{PROC}/fold.json",
     output:
         report=f"{RES}/design_report.json",
         figure=f"{RES}/consensus.png",
     shell:
         "{PY} -m design_ops.report {input.scores} {input.backbone} "
-        "{output.report} {output.figure}"
+        "{output.report} {output.figure} {input.fold}"

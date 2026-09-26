@@ -8,3 +8,4 @@ data/raw/*.pdb
 !**/.gitkeep
 outputs/
 .DS_Store
+results/*/folds/

@@ -9,7 +9,7 @@ the defensible shortlist. Disagreement is reported, not hidden.
 ## Pipeline
 
 ```
-backbone -> generate (ProteinMPNN) -> score (ESM-2) -> report
+backbone -> generate (ProteinMPNN) -> score (ESM-2) -> fold (ESMFold) -> report
 ```
 
 - `backbone.py` - parse PDB, extract design chain + native sequence
@@ -18,8 +18,11 @@ backbone -> generate (ProteinMPNN) -> score (ESM-2) -> report
   carrying MPNN's own score and sequence recovery
 - `score.py` - ESM-2 mean pseudo-log-likelihood per candidate (mask each
   position, log-prob of the actual residue, average)
+- `fold.py` - ESMFold structure screen: per-design pLDDT/PTM confidence
+  plus the native for reference (~8 GB weights on first run, ~2 min/seq
+  on CPU; skip with `snakemake report` after removing the fold input)
 - `report.py` - consensus ranking, score correlation, diversity,
-  identity-to-WT, scatter figure
+  identity-to-WT, fold-confidence screen, scatter figure
 
 ## Quickstart
 
@@ -50,6 +53,24 @@ seconds on CPU, including ESM-2 scoring. A second config
   fixed-backbone redesign. It is a sequence-fitness observation, not a
   folding or function claim.
 
+## Structure screen (ESMFold, measured on 1L2Y)
+
+The 16 trp-cage designs plus the native were folded with ESMFold v1.
+pLDDT is ESMFold's own per-residue confidence, not an experimental
+structure.
+
+| Set | mean pLDDT | confident (>=70) |
+|---|---:|---:|
+| native 1L2Y | 76.9 | yes |
+| 16 designed | 73.6 | 13/16 |
+
+The top-2 consensus picks fold at 76.2 and 74.2, above the native
+band. Consensus #3 is the weakest folder in the batch (68.7), so the
+three-way agreement (MPNN rank + ESM-2 rank + fold confidence) is a
+real filter, not a formality. pTM is 0.09 to 0.12 across the board and
+carries no signal here. On a 20-mer the metric sits near its floor and
+needs longer chains to discriminate.
+
 `design_report.json` carries a `provenance` block: backbone id,
 ProteinMPNN upstream commit + weights, sampling params/seed, and the
 ESM-2 model id, enough to reproduce a run exactly.
@@ -65,9 +86,10 @@ anticorrelate.
 
 ## Scope
 
-- Candidates are computational designs only. No claim of stability,
-  folding, or function. That requires structure prediction of the
-  designs (e.g. ESMFold/Boltz) or experiment.
+- Candidates are computational designs only. The ESMFold screen is a
+  model-confidence signal, not a solved structure and not a function
+  claim. It upgrades "scores well on two sequence models" to "also
+  predicted to fold," and that is as far as the evidence goes.
 - Two backbones, one temperature, one seed is a demo, not a study.
   `config/config.yaml` holds all settings for sweeps.
 - ProteinMPNN and ESM-2 are upstream models (dauparas/ProteinMPNN,

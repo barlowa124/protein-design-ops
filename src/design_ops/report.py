@@ -92,7 +92,7 @@ def _provenance(backbone: dict, cfg: dict) -> dict:
 
 
 def report(records: list[dict], backbone: dict, cfg: dict,
-           out_json: str, out_png: str) -> dict:
+           out_json: str, out_png: str, folds: list[dict] = None) -> dict:
     designed = [r for r in records if not r["is_native"]]
     natives = [r for r in records if r["is_native"]]
     if not natives:
@@ -117,6 +117,14 @@ def report(records: list[dict], backbone: dict, cfg: dict,
     top_k = min(top_k, len(designed))
     top_idx = consensus.argsort()[:top_k]
 
+    # Optional ESMFold confidence from the fold stage: pLDDT is the
+    # model's own folding confidence, not an experimental structure.
+    fold_by_seq = {}
+    if folds:
+        for fr in folds:
+            if fr.get("seq") and fr.get("fold"):
+                fold_by_seq[fr["seq"]] = fr["fold"]
+
     # Rank statistics need >=2 candidates; below that report nulls rather
     # than letting NaN fail at json.dump(allow_nan=False).
     pw = pairwise_identities(seqs)
@@ -138,6 +146,11 @@ def report(records: list[dict], backbone: dict, cfg: dict,
                 "mpnn_score": designed[i]["mpnn_score"],
                 "esm_pll": designed[i]["esm_pll"],
                 "seq_recovery": designed[i]["seq_recovery"],
+                **({"plddt_mean": round(
+                        fold_by_seq[designed[i]["seq"]]["plddt_mean"], 1),
+                    "ptm": round(
+                        fold_by_seq[designed[i]["seq"]]["ptm"], 3)}
+                   if designed[i]["seq"] in fold_by_seq else {}),
             }
             for i in top_idx
         ],
@@ -147,6 +160,20 @@ def report(records: list[dict], backbone: dict, cfg: dict,
             "mean": round(float(esm.mean()), 3),
         },
     }
+    if folds is not None:
+        dpl = [fold_by_seq[r["seq"]]["plddt_mean"]
+               for r in designed if r["seq"] in fold_by_seq]
+        result["fold_screen"] = {
+            "n_folded": len(dpl),
+            "n_unfolded": len(designed) - len(dpl),
+            "native_plddt": (round(
+                fold_by_seq[native["seq"]]["plddt_mean"], 1)
+                if native["seq"] in fold_by_seq else None),
+            # >70 is the conventional "confident" pLDDT band
+            "designed_plddt_mean": (
+                round(float(np.mean(dpl)), 1) if dpl else None),
+            "n_confident_ge70": int(sum(v >= 70 for v in dpl)),
+        }
 
     fig, ax = plt.subplots(figsize=(6, 5))
     ax.scatter(mpnn, esm, c=rec, cmap="viridis", s=40)
@@ -180,7 +207,11 @@ def main() -> None:
         records = json.load(f)
     with open(bb_path) as f:
         backbone = json.load(f)
-    result = report(records, backbone, cfg, out_json, out_png)
+    folds = None
+    if len(sys.argv) > 5:
+        with open(sys.argv[5]) as f:
+            folds = json.load(f)
+    result = report(records, backbone, cfg, out_json, out_png, folds)
     print(
         f"report: {result['n_designed']} designed, consensus "
         f"spearman={result['score_correlation_spearman']} -> {out_json}"
