@@ -53,23 +53,24 @@ seconds on CPU, including ESM-2 scoring. A second config
   fixed-backbone redesign. It is a sequence-fitness observation, not a
   folding or function claim.
 
-## Structure screen (ESMFold, measured on 1L2Y)
+## Structure screen (ESMFold, measured on both backbones)
 
-The 16 trp-cage designs plus the native were folded with ESMFold v1.
-pLDDT is ESMFold's own per-residue confidence, not an experimental
-structure.
+All designs plus natives were folded with ESMFold v1. pLDDT is
+ESMFold's own per-residue confidence, not an experimental structure.
 
-| Set | mean pLDDT | confident (>=70) |
-|---|---:|---:|
-| native 1L2Y | 76.9 | yes |
-| 16 designed | 73.6 | 13/16 |
+| Backbone | native pLDDT | designed mean | confident (>=70) | designed pTM |
+|---|---:|---:|---:|---:|
+| 1L2Y trp-cage (20 aa) | 76.9 | 73.6 | 13/16 | 0.09-0.12 |
+| 1UBQ ubiquitin (76 aa) | 77.4 | 80.6 | 16/16 | 0.83-0.87 |
 
-The top-2 consensus picks fold at 76.2 and 74.2, above the native
-band. Consensus #3 is the weakest folder in the batch (68.7), so the
-three-way agreement (MPNN rank + ESM-2 rank + fold confidence) is a
-real filter, not a formality. pTM is 0.09 to 0.12 across the board and
-carries no signal here. On a 20-mer the metric sits near its floor and
-needs longer chains to discriminate.
+The top-2 1L2Y consensus picks fold at 76.2 and 74.2, above the
+native band. Consensus #3 is the weakest folder in the batch (68.7),
+so the three-way agreement is a real filter, not a formality. On 1UBQ
+every design sits in the confident band and pTM separates cleanly
+from the 1L2Y floor: 0.83-0.87 on the 76-mer vs 0.09-0.12 on the
+20-mer. The pTM flat-line on trp-cage is a length artifact (pTM needs
+longer chains to discriminate), now demonstrated on both lengths
+instead of asserted.
 
 `design_report.json` carries a `provenance` block: backbone id,
 ProteinMPNN upstream commit + weights, sampling params/seed, and the
