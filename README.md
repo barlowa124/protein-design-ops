@@ -63,8 +63,8 @@ ESMFold's own per-residue confidence, not an experimental structure.
 | 1L2Y trp-cage (20 aa) | 76.9 | 73.6 | 13/16 | 0.09-0.12 |
 | 1UBQ ubiquitin (76 aa) | 77.4 | 80.6 | 16/16 | 0.83-0.87 |
 
-The top-2 1L2Y consensus picks fold at 76.2 and 74.2, above the
-native band. Consensus #3 is the weakest folder in the batch (68.7),
+The top-2 1L2Y consensus picks fold at 76.2 and 74.2, in the native
+band (76.9) but not above it. Consensus #3 is the weakest folder in the batch (68.7),
 so the three-way agreement is a real filter, not a formality. On 1UBQ
 every design sits in the confident band and pTM separates cleanly
 from the 1L2Y floor: 0.83-0.87 on the 76-mer vs 0.09-0.12 on the
