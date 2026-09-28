@@ -41,10 +41,18 @@ def pll(seq: str, tok, model) -> float:
 def score_candidates(records: list[dict], model_name: str) -> list[dict]:
     from transformers import AutoTokenizer, EsmForMaskedLM
 
+    from design_ops.esm_cache import get, put
+
     tok = AutoTokenizer.from_pretrained(model_name)
     model = EsmForMaskedLM.from_pretrained(model_name).eval()
     for r in records:
-        r["esm_pll"] = round(pll(r["seq"], tok, model), 4)
+        cached = get("esm2-pll", model_name, r["seq"])
+        if cached is None:
+            score = round(pll(r["seq"], tok, model), 4)
+            put("esm2-pll", model_name, r["seq"], score)
+        else:
+            score = round(float(cached), 4)
+        r["esm_pll"] = score
     return records
 
 
