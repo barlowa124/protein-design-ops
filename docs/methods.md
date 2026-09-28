@@ -10,7 +10,7 @@
 The models are independent: MPNN never sees ESM's training distribution
 directly and ESM never sees the backbone. Agreement between a
 structure-conditioned likelihood and a sequence-prior fitness is
-meaningful corroboration; anticorrelation (as observed on 1L2Y) means the
+corroborating evidence. Anticorrelation (as observed on 1L2Y) means the
 design sits where the two objectives trade off.
 
 ## Known limitations
@@ -22,12 +22,12 @@ design sits where the two objectives trade off.
 - No structure validation of designs is performed. A stronger pipeline
   would fold top consensus candidates (ESMFold/Boltz) and filter by
   pLDDT/TM-score to backbone.
-- Sampling temperature and seed are config'd; a study would sweep both
+- Sampling temperature and seed are config'd. A study would sweep both
   and report the score distribution, not a single run.
 
 ## External dependencies
 
 - `dauparas/ProteinMPNN` - cloned separately (`config.mpnn.repo_path`),
-  invoked as a subprocess; its weights ship with the repo. MIT license.
+  invoked as a subprocess. Its weights ship with the repo. MIT license.
 - `facebook/esm2_t6_8M_UR50D` via HuggingFace transformers, downloaded
   on first run.

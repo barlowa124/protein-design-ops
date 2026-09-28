@@ -4,7 +4,7 @@ Backbone-conditioned sequence design with **independent rescoring**: given a
 protein backbone, ProteinMPNN generates candidate sequences, then ESM-2
 scores each candidate's zero-shot sequence fitness, a second model's
 opinion on the first model's output. Candidates both models agree on are
-the defensible shortlist. Disagreement is reported, not hidden.
+the defensible shortlist. The report shows where the models disagree.
 
 ## Pipeline
 
@@ -17,7 +17,7 @@ backbone -> generate (ProteinMPNN) -> score (ESM-2) -> fold (ESMFold) -> report
   clone, not vendored, see `config.mpnn.repo_path`), parses FASTA headers
   carrying MPNN's own score and sequence recovery
 - `score.py` - ESM-2 mean pseudo-log-likelihood per candidate (mask each
-  position, log-prob of the actual residue, average)
+  position, log-prob of the residue at that position, average)
 - `fold.py` - ESMFold structure screen: per-design pLDDT/PTM confidence
   plus the native for reference (~8 GB weights on first run, ~2 min/seq
   on CPU; skip with `snakemake report` after removing the fold input)
