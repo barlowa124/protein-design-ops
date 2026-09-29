@@ -1,3 +1,7 @@
+> **This repository has moved.** Active development continues in [barlowa124/protein-ml](https://github.com/barlowa124/protein-ml) under [`protein_design_ops/`](https://github.com/barlowa124/protein-ml/tree/main/protein_design_ops). This repo is archived and kept for link stability.
+
+---
+
 # protein-design-ops
 
 Backbone-conditioned sequence design with **independent rescoring**: given a
